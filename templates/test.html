@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>表格管理平台</title>
+</head>
+<body>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3>表格管理平台</h3>
+                <td><input type="button" value="批量删除" id="ck_test"></td>
+                <br>
+                <td><input type="text" placeholder="请输入设备IP" id="search_content"><input type="button" value="开始搜索"
+                                                                                        id="search"></td>
+                <br>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="test">
+                        <thead>
+                        <tr>
+                            {% for i in labels %}
+                            <td>{{ i }}</td>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in content %}
+                        <tr>
+                            {% for j in i %}
+                            <td>{{ j }}</td>
+                            {% endfor %}
+                            <td><input type="button" id="edit" value="编辑"></td>
+                            <td><input type="submit" value="提交"></td>
+                            <td><input type="checkbox" name="ck"></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script>
+		(function(){
+            <!--定义属性是button的按钮在点击后，产生下面的function功能-->
+			$('input[id="edit"]').on('click', function(){
+            <!--获取当前事件，并进行当前按钮的状态，如果是编辑状态，就进行将每个单元格设置成可输入状态-->
+				var $this = $(this),
+					edit_status = $this.attr('edit_status'),
+					status_value = edit_status && 1 == edit_status ? 0 : 1,
+					$td_arr = $this.parent().prevAll('td');
+				$this.val(1 == status_value ? '完成' : '编辑').attr('edit_status', status_value);
+            <!--如果单元格是可编辑状态，获取每列元素的值，并在最后html表格上进行展示-->
+				$.each($td_arr, function(){
+					var $td = $(this);
+					if(1 == status_value) {
+						$td.html('<input type="text" value="'+$td.html()+'">');
+            <!--如果按钮状态是完成状态，直接展示单元内的值-->
+					} else if(0 == status_value){
+						$td.html($td.find('input[type=text]').val());
+					}
+				});
+			});
+		})();
+
+
+</script>
+<script>
+		(function(){
+            <!--定义属性是submit的按钮在点击后，产生下面的function功能-->
+			$('input[type="submit"]').on('click', function(){
+                <!--获取当前行的id -->
+                var td = event.srcElement.parentElement;
+                var rownum = td.parentElement.rowIndex;
+                alert(td.innerHTML)
+                <!--获取html表格元素 -->
+                var tab = document.getElementById("test");
+                <!--将每个单元格元素进行取值，并以字典形式传给后台 -->
+                var data = {
+                    "ID":tab.rows[rownum].cells[0].innerHTML,
+                    "网络IP":tab.rows[rownum].cells[1].innerHTML,
+                    "地址":tab.rows[rownum].cells[2].innerHTML,
+                    "责任人":tab.rows[rownum].cells[3].innerHTML,
+                    "联系方式":tab.rows[rownum].cells[4].innerHTML,
+                };
+                alert("提交成功！")
+                $.ajax({
+                    type: "get",
+                    url: "/edit",
+                    data: data,
+                    dataType: "json"
+                    });
+		    });
+        })();
+
+
+</script>
+
+
+<script>
+		(function(){
+			$('input[id="ck_test"]').on('click', function(){
+                var node = document.getElementsByName("ck");
+                var tab = document.getElementById("test");
+                var res = new Array()
+                for (var i = 0; i< node.length; i++){
+                    if (node[i].checked){
+                        res[i] = tab.rows[i+1].cells[1].innerHTML
+                        }
+                    else{
+                        res[i] = 0
+                    }
+                }
+                var data = {
+                    "ip":JSON.stringify(res)
+                };
+                alert("删除成功，请刷新界面！")
+                $.ajax({
+                    type: "get",
+                    url: "/delete",
+                    data: data,
+                    dataType: "json"
+                    });
+		    });
+        })();
+
+
+</script>
+
+<!--新增搜索功能-->
+<script>
+		(function(){
+			$('input[id="search"]').on('click', function(){
+                var content = document.getElementById("search_content").value;
+                var data = {
+                    "search_content":content
+                };
+                $.ajax({
+                    type: "get",
+                    url: "/",
+                    data: data,
+                    dataType: "json",
+                    success:window.location.href="search_result/"+content
+                    });
+		    });
+        })();
+</script>
+
+</body>
+</html>
