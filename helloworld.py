@@ -36,7 +36,7 @@ def ck_test():
     return "删除数据成功！"
 
 
-@app.route('/edit', methods=['get'])
+@app.route('/edit', methods=['get','post'])
 def edit():
     label = ['ID', '网络IP', '地址', '责任人', '联系方式']
     content = [request.args.get(i) for i in label]
@@ -48,5 +48,15 @@ def edit():
     con.commit()
     return "数据写入成功！"
 
+
+@app.route('/search_result/<type>/<content>', methods=['get','post'])
+def search_result(type,content):
+    sql = "select * from material_table where {}='{}'".format(type,content)
+    cur = con.cursor()
+    cur.execute(sql)
+    content = cur.fetchall()
+    labels = [tuple[0] for tuple in cur.description]
+    return render_template('test.html', content=content, labels=labels)
+
 if __name__ == '__main__':
-    app.run(host="11.240.65.176",debug=True)
+    app.run(host="192.168.0.101",debug=True)

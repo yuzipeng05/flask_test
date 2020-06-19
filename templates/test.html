@@ -19,7 +19,14 @@
                 <h3>表格管理平台</h3>
                 <td><input type="button" value="批量删除" id="ck_test"></td>
                 <br>
-                <td><input type="text" placeholder="请输入设备IP" id="search_content"><input type="button" value="开始搜索"
+                <td>
+                    <select id="select_type" style="font-weight:700">
+                        <option>请选择搜索类型</option>
+                        <option>网络IP</option>
+                        <option>地址</option>
+                        <option>责任人</option>
+                    </select>
+                    <input type="text" placeholder="请输入设备IP" id="search_content"><input type="button" value="开始搜索"
                                                                                         id="search"></td>
                 <br>
             </div>
@@ -89,6 +96,10 @@
 		})();
 
 
+
+
+
+
 </script>
 <script>
 		(function(){
@@ -117,8 +128,6 @@
                     });
 		    });
         })();
-
-
 </script>
 
 
@@ -148,8 +157,6 @@
                     });
 		    });
         })();
-
-
 </script>
 
 <!--新增搜索功能-->
@@ -157,6 +164,7 @@
 		(function(){
 			$('input[id="search"]').on('click', function(){
                 var content = document.getElementById("search_content").value;
+                var select_type = document.getElementById("select_type").value;
                 var data = {
                     "search_content":content
                 };
@@ -165,11 +173,11 @@
                     url: "/",
                     data: data,
                     dataType: "json",
-                    success:window.location.href="search_result/"+content
+                    success:window.location.href="search_result/"+select_type+'/'+content
                     });
 		    });
         })();
 </script>
-
 </body>
 </html>
+
